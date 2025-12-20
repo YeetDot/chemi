@@ -1,0 +1,8 @@
+// 1.21.11	-999999999-01-01T00:00:00	chemi/Model Definitions
+4478d6990c319bd33aef745f95424e1cd7ce93e2 assets/chemi/blockstates/crucible.json
+f1e92ea0504f875694f4b00619c1352a4a2d3438 assets/chemi/items/crucible.json
+fbdbc9af51e158d42f0784936c1cd6ddf6baccbc assets/chemi/items/electrum_ingot.json
+b8308c72c6c7e167fc9e09dfa77901bdb38727f1 assets/chemi/items/silver_ingot.json
+e9f9a34d15382041ce90f5efab5660bbdc74051c assets/chemi/models/block/crucible.json
+d8e3700eba8fc2dd3bed0eba22bcc47b2b929989 assets/chemi/models/item/electrum_ingot.json
+c5d3fc2ec29348de713dabef4403fe0b020b15b4 assets/chemi/models/item/silver_ingot.json

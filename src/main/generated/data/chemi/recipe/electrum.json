@@ -1,0 +1,19 @@
+{
+  "type": "chemi:crucible",
+  "duration": 10,
+  "ingredients": [
+    {
+      "count": 2,
+      "ingredient": "minecraft:gold_ingot"
+    },
+    {
+      "count": 1,
+      "ingredient": "chemi:silver_ingot"
+    }
+  ],
+  "mainoutput": {
+    "count": 3,
+    "id": "chemi:electrum_ingot"
+  },
+  "suboutput": {}
+}

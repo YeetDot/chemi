@@ -1,0 +1,14 @@
+{
+  "type": "chemi:crucible",
+  "ingredients": [
+    {"ingredient": "minecraft:gold_ingot", "count": 2},
+    {"ingredient": "minecraft:copper_ingot", "count": 1}
+  ],
+  "duration": 100,
+  "mainoutput": {
+    "id": "minecraft:poppy"
+  },
+  "suboutput": {
+    "id": "minecraft:dandelion"
+  }
+}
