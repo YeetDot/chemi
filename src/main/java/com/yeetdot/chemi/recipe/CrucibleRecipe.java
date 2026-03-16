@@ -2,7 +2,9 @@ package com.yeetdot.chemi.recipe;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.OptionalFieldCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.RegistryByteBuf;
@@ -15,7 +17,9 @@ import net.minecraft.world.World;
 
 import java.util.*;
 
-public record CrucibleRecipe(List<CountedIngredient> ingredients, int duration, ItemStack mainOutput, ItemStack subOutput) implements MultiOutputWithRNGRecipe<CrucibleRecipeInput> {
+public record CrucibleRecipe(List<CountedIngredient> ingredients, int duration, ItemStack mainOutput, ItemStack subOutput, double subOutputDropChance) implements MultiOutputWithRNGRecipe<CrucibleRecipeInput> {
+    public static final PacketCodec<ByteBuf, OptionalDouble> OPTIONAL_DOUBLE = PacketCodecs.DOUBLE.xmap(value -> value == 0 ? OptionalDouble.empty() : OptionalDouble.of(value - 1), value -> value.isPresent() ? value.getAsDouble() + 1 : 0);
+
     @Override
     public boolean matches(CrucibleRecipeInput input, World world) {
         // Build available pool
@@ -94,14 +98,32 @@ public record CrucibleRecipe(List<CountedIngredient> ingredients, int duration, 
                 CountedIngredient.CODEC.listOf(1, 3).fieldOf("ingredients").forGetter(CrucibleRecipe::ingredients),
                 Codec.INT.fieldOf("duration").forGetter(CrucibleRecipe::duration),
                 ItemStack.CODEC.fieldOf("mainoutput").forGetter(CrucibleRecipe::mainOutput),
-                ItemStack.OPTIONAL_CODEC.fieldOf("suboutput").forGetter(CrucibleRecipe::subOutput)
+                ItemStack.OPTIONAL_CODEC.fieldOf("suboutput").forGetter(CrucibleRecipe::subOutput),
+                Codec.DOUBLE.optionalFieldOf("sub_output_drop_chance", 0.0D).forGetter(CrucibleRecipe::subOutputDropChance)
         ).apply(inst, CrucibleRecipe::new));
-        public static final PacketCodec<RegistryByteBuf, CrucibleRecipe> PACKET_CODEC = PacketCodec.tuple(
-                CountedIngredient.PACKET_CODEC.collect(PacketCodecs.toList()), CrucibleRecipe::ingredients,
-                PacketCodecs.INTEGER, CrucibleRecipe::duration,
-                ItemStack.PACKET_CODEC, CrucibleRecipe::mainOutput,
-                ItemStack.OPTIONAL_PACKET_CODEC, CrucibleRecipe::subOutput,
-                CrucibleRecipe::new);
+        public static final PacketCodec<RegistryByteBuf, CrucibleRecipe> PACKET_CODEC = PacketCodec.of(
+                ((recipe, buf) -> {
+                    CountedIngredient.PACKET_CODEC.collect(PacketCodecs.toList()).encode(buf, recipe.ingredients);
+                    buf.writeInt(recipe.duration);
+                    ItemStack.PACKET_CODEC.encode(buf, recipe.mainOutput());
+                    ItemStack.OPTIONAL_PACKET_CODEC.encode(buf, recipe.subOutput());
+                    buf.writeDouble(recipe.subOutputDropChance());
+                }),
+                buf -> {
+                    List<CountedIngredient> ingredients = CountedIngredient.PACKET_CODEC.collect(PacketCodecs.toList()).decode(buf);
+                    int duration = buf.readInt();
+                    ItemStack main = ItemStack.PACKET_CODEC.decode(buf);
+                    ItemStack sub = ItemStack.PACKET_CODEC.decode(buf);
+                    double subOutputDropChance = buf.readDouble();
+                    return new CrucibleRecipe(ingredients, duration, main, sub, subOutputDropChance);
+                });
+//                tuple(
+//                CountedIngredient.PACKET_CODEC.collect(PacketCodecs.toList()), CrucibleRecipe::ingredients,
+//                PacketCodecs.INTEGER, CrucibleRecipe::duration,
+//                ItemStack.PACKET_CODEC, CrucibleRecipe::mainOutput,
+//                ItemStack.OPTIONAL_PACKET_CODEC, CrucibleRecipe::subOutput,
+//                PacketCodecs.DOUBLE, CrucibleRecipe::subOutputDropChance,
+//                CrucibleRecipe::new);
         @Override
         public MapCodec<CrucibleRecipe> codec() {
             return CODEC;

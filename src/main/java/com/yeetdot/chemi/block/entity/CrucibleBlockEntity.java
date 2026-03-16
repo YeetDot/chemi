@@ -112,11 +112,8 @@ public class CrucibleBlockEntity extends BlockEntity implements ExtendedScreenHa
         CrucibleRecipeInput input = new CrucibleRecipeInput(inventory.subList(0, 3));
         Optional<RecipeEntry<CrucibleRecipe>> recipe = getCurrentRecipe(world);
         if (recipe.isPresent()) {
-            Chemi.LOGGER.info("present");
             if (recipe.get().value().matches(input, world)) {
-                Chemi.LOGGER.info("matched");
                 if (canAcceptRecipeOutput(recipe.get(), input, inventory)) {
-                    Chemi.LOGGER.info("can accept");
                     ItemStack mainOutput = inventory.get(4);
                     ItemStack subOutput = inventory.get(5);
                     ItemStack mainOutput1 = recipe.get().value().mainOutput().copy();
@@ -127,9 +124,48 @@ public class CrucibleBlockEntity extends BlockEntity implements ExtendedScreenHa
                         mainOutput.increment(mainOutput1.getCount());
                     }
                     if (subOutput.isEmpty()) {
-                        inventory.set(5, subOutput1.copy());
+                        double chance = recipe.get().value().subOutputDropChance();
+                        int baseCount = subOutput1.getCount();
+                        int count = 0;
+
+                        // guaranteed drops for integer part
+                        if (chance >= 1.0) {
+                            count += (int) Math.floor(chance) * baseCount;
+                            chance = chance % 1.0;
+                        }
+
+                        // uniform drop for fractional part
+                        if (baseCount == 1) {
+                            if (world.getRandom().nextDouble() < chance) {
+                                count += 1;
+                            }
+                        } else {
+                            count += world.getRandom().nextInt((int) Math.ceil(baseCount * chance) + 1);
+                        }
+
+                        inventory.set(5, new ItemStack(subOutput1.getItem(), count));
                     } else {
-                        subOutput.increment(subOutput1.getCount());
+                        double chance = recipe.get().value().subOutputDropChance();
+                        int baseCount = subOutput1.getCount();
+                        int count = 0;
+
+                        // guaranteed drops for integer part
+                        if (chance >= 1.0) {
+                            count += (int) Math.floor(chance) * baseCount;
+                            chance = chance % 1.0;
+                        }
+
+                        // uniform drop for fractional part
+                        if (baseCount == 1) {
+                            if (world.getRandom().nextDouble() < chance) {
+                                count += 1;
+                            }
+                        } else {
+                            count += world.getRandom().nextInt((int) Math.ceil(baseCount * chance) + 1);
+                        }
+
+                        subOutput.increment(count);
+
                     }
                     consumeIngredients(recipe.get().value().ingredients(), inventory);
                 }

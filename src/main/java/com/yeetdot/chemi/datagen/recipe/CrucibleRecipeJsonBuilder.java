@@ -23,17 +23,19 @@ public class CrucibleRecipeJsonBuilder {
     private final int duration;
     private final ItemStack mainoutput;
     private final ItemStack suboutput;
+    private final double suboutputdropchance;
     private final Map<String, AdvancementCriterion<?>> criteria = new LinkedHashMap<>();
 
-    private CrucibleRecipeJsonBuilder(List<CountedIngredient> ingredients, int duration, ItemStack mainoutput, ItemStack suboutput) {
+    private CrucibleRecipeJsonBuilder(List<CountedIngredient> ingredients, int duration, ItemStack mainoutput, ItemStack suboutput, double suboutputdropchance) {
         this.ingredients = ingredients;
         this.duration = duration;
         this.mainoutput = mainoutput;
         this.suboutput = suboutput;
+        this.suboutputdropchance = suboutputdropchance;
     }
 
-    public static CrucibleRecipeJsonBuilder create(List<CountedIngredient> ingredients, int duration, ItemStack mainoutput, ItemStack suboutput) {
-        return new CrucibleRecipeJsonBuilder(ingredients, duration, mainoutput, suboutput);
+    public static CrucibleRecipeJsonBuilder create(List<CountedIngredient> ingredients, int duration, ItemStack mainoutput, ItemStack suboutput, double suboutputdropchance) {
+        return new CrucibleRecipeJsonBuilder(ingredients, duration, mainoutput, suboutput, suboutputdropchance);
     }
 
     public CrucibleRecipeJsonBuilder criterion(String string, AdvancementCriterion<?> advancementCriterion) {
@@ -48,7 +50,7 @@ public class CrucibleRecipeJsonBuilder {
                 .rewards(AdvancementRewards.Builder.recipe(recipeKey))
                 .criteriaMerger(AdvancementRequirements.CriterionMerger.OR);
         this.criteria.forEach(builder::criterion);
-        CrucibleRecipe crucibleRecipe = new CrucibleRecipe(this.ingredients, this.duration, this.mainoutput, this.suboutput);
+        CrucibleRecipe crucibleRecipe = new CrucibleRecipe(this.ingredients, this.duration, this.mainoutput, this.suboutput, this.suboutputdropchance);
         recipeExporter.accept(recipeKey, crucibleRecipe, builder.build(recipeKey.getValue().withPrefixedPath("recipes/" + category.getName() + "/")));
     }
 

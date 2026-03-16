@@ -1,0 +1,23 @@
+{
+  "type": "chemi:crucible",
+  "duration": 5,
+  "ingredients": [
+    {
+      "count": 3,
+      "ingredient": "minecraft:iron_ingot"
+    },
+    {
+      "count": 1,
+      "ingredient": "minecraft:coal"
+    }
+  ],
+  "mainoutput": {
+    "count": 3,
+    "id": "minecraft:waxed_exposed_cut_copper_stairs"
+  },
+  "sub_output_drop_chance": 0.5,
+  "suboutput": {
+    "count": 1,
+    "id": "minecraft:cocoa_beans"
+  }
+}
